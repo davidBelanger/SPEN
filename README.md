@@ -36,5 +36,8 @@ It is straightforward to implement new structured prediction applications using 
 ## Options
 See the top of main.lua for a long list of command line options and their explanations. 
 
+## License 
+MIT
+
 ## Coding Style
 Some time this year I adopted a terrible habit of interweaving camelCase and separated\_by\_underscores coding styles. I apologize. I will fix this at some point. 

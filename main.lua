@@ -7,7 +7,7 @@ require 'nn'
 require 'optim'
 
 --these files are from the torch-util project https://github.com/davidBelanger/torch-util
-package.path = package.path .. ';../../torch-util/?.lua'
+package.path = package.path .. ';../torch-util/?.lua'
 require 'MinibatcherFromFile'
 require 'MinibatcherFromFileList'
 require 'OnePassMiniBatcherFromFileList'
@@ -26,7 +26,7 @@ require 'SingleBatcher'
 require 'ImageAnalysis'
 require 'RepeatedCriterion'
 
-require 'SpatialConvolutionFromInput'
+
 require 'EpochDropout'
 require 'Optimizer'
 require 'SPENOptimizer'

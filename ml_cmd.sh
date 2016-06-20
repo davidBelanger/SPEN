@@ -2,7 +2,7 @@
 outdir=ml-logs
 d=$outdir/`date | sed 's| |_|g'`
 log=$d/log.txt
-mkdir $d
+mkdir -p $d
 
 #if you want to initialize the features / unary potentials from something pretrained, specify it here
 #initClassifier=XXX
