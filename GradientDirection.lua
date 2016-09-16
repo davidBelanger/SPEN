@@ -1,9 +1,15 @@
 local GradientDirection, parent = torch.class('nn.GradientDirection', 'nn.Container')
 
---it expects a table of inputs, and its output is the partial derivative of energy_network with respect to input[tableIndex]. 
+--This module wraps an a network (called energy_network below). In the forward pass, it returns the gradient of the energy_network.
+--The backwards pass, which requires computing a Hessian-vector product, uses finite differences. See, for example, 
+--Justin Domke "Generic Methods for Optimization-Based Modeling." AISTATS 2012 for  a derivation. 
 
---The gradient of this module (which corresponds to a Hessian-vector product) is computed using finite differences. 
---This will only be well-behaved if energy_network is smooth in both its inputs and parameters (and epsilon is small).
+--The energy_network expects a table of inputs, and the output of GradientDirection is the partial derivative 
+-- of energy_network with respect to input[tableIndex]. 
+
+--Since the Hessian-vector product is computed using finite differences, the approximation will 
+-- will only be well-behaved if energy_network is smooth in both its inputs and parameters. Also, epsilon (the finite difference step size)
+-- needs to be small. 
 
 --NOTE: This does not expect data stored in energy_network will persist. All computations here copy things out of the return values from energy_network. 
 --This means that if you have a bunch of GradientDirection modules, you can pass all of them the same energy_network, without cloning it
