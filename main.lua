@@ -53,7 +53,8 @@ cmd:option('-cudnn',false,'whether to use cudnn, where appropriate')
 cmd:option('-minibatch',32,'minibatch size')
 cmd:option('-profile',0,"whether to do profiling")
 cmd:option('-shuffle',1,'whether to shuffle the data after you take a pass through it')
-cmd:option('-testOnly',0,"whether to only run evaluation")
+cmd:option('-testOnly',0,"whether to only run evaluation. If numEpochs > 0 for pretrainUnaries mode, this will evaluate the unary classifier. Otherwise, it will evaluate the SPEN.")
+
 cmd:option('-problem','ML',"what kind of problem (ML,Denoise)")
 cmd:option('-trainingConfigs',"","list of serialized training config files")
 
