@@ -57,15 +57,6 @@ function GeneralOptions:get_flags()
 	cmd:option('-entropy_weight',1.0,"weight to place on entropy term") 
 	cmd:option('-init_at_local_prediction',1,"whether to init prediction using unary predictor")
 
-
-	--Loss Options
-	cmd:option('-instance_weighted_loss',0,"whether to use an instance-weighted loss. Right now, this is only supported for SRL")
-	cmd:option('-loss_type',"log","what training loss to use")
-	cmd:option('-negative_example_weight',0.001,"how much to down-weight negative examples (only available for certain losses)")
-	cmd:option('-false_positive_penalty',0,"Only for SRL. How much extra weight to place on the loss for arcs that weren't filtered by the preprocessing but have a ground truth null label")
-
-
-
 	cmd:option('-results_file',"","optional file base name for writing results files")
 	cmd:option('-model_file',"","base name for where to save models. the output .rnn file contains the full unrolled inference network. The .energy_net file only contains the energy network.")
 	cmd:option('-out_dir',"./results/","base name for where to save models")

@@ -38,20 +38,17 @@ package.path = package.path .. ';evaluate/?.lua'
 require 'Evaluator'
 require 'HammingEvaluator'
 require 'MultiLabelEvaluation'
-require 'SRLEvaluator'
 require 'PSNREvaluator'
 
 
 package.path = package.path .. ';batch/?.lua'
 require 'BatcherFromFactory'
 require 'BatcherFromFile'
-require 'SRLBatcher'
 
 package.path = package.path .. ';train/?.lua'
 require 'Train'
 require 'Independent'
 require 'SSVM'
-require 'InstanceWeightedNLL'
 require 'TrainingWrappers'
 
 package.path = package.path .. ';infer1d/?.lua'
@@ -60,7 +57,6 @@ require 'Inference1DUtil'
 package.path = package.path .. ';model/?.lua'
 require 'ChainSPEN'
 require 'MLCSPEN'
-require 'SRLSPEN'
 require 'DepthSPEN'
 
 package.path = package.path .. ';infer/?.lua'

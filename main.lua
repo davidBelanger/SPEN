@@ -115,70 +115,6 @@ elseif(params.problem == "Depth") then
 		local test_batcher  = BatcherFromFile(params.test_list, train_preprocess_func, params.batch_size, use_cuda)
 		return model, y_shape, evaluator_factory, preprocess_func, train_batcher, test_batcher
 	end
-elseif(params.problem == 'SRL') then
-	load_problem = function(params)
-		local problem_config = torch.load(params.problem_config)
-		
-		-- local train_labels_file = "srl/processed_data/conll2005/train.arcs.torch.small"
-		-- local train_features_file = "srl/processed_data/conll2005/train.features.torch.small"
-
-		-- local test_labels_file = "srl/processed_data/conll2005/train.arcs.torch.small"
-		-- local test_features_file = "srl/processed_data/conll2005/train.features.torch.small"
-
-		local train_labels_file = "srl/processed_data/conll2005_3/train.arcs.torch"
-		local train_features_file = "srl/processed_data/conll2005_3/train.all.features.torch"
-		local train_collision_file_base = "srl/processed_data/conll2005_3/train.collisions"
-		local srl_labels_map_file = "srl/processed_data/conll2005_3/role_to_id.txt"
-
-		local test_labels_file = "srl/processed_data/conll2005_3/dev.arcs.torch"
-		local test_features_file = "srl/processed_data/conll2005_3/dev.all.features.torch"
-		local test_collision_file_base = "srl/processed_data/conll2005_3/dev.collisions"
-		
-		local domain_size = problem_config.domain_size
-		local null_arc_index = problem_config.null_arc_index
-		local batch_size = params.batch_size
-		local feature_dim = problem_config.feature_dim
-		problem_config.feature_dim = problem_config.feature_dim + 1 -- add one because the batcher adds one more feature 
-
-		problem_config.load_node_features  = true --todo: surface
-		local train_node_files
-		local test_node_files
-		if(problem_config.load_node_features) then
-			train_node_files = {"srl/processed_data/conll2005_3/train.predicate.features.torch","srl/processed_data/conll2005_3/train.arg.features.torch"}
-			test_node_files = {"srl/processed_data/conll2005_3/dev.predicate.features.torch","srl/processed_data/conll2005_3/dev.arg.features.torch"}
-		end
-
-		local train_batcher = SRLBatcher(train_labels_file,train_features_file,train_collision_file_base, train_node_files, batch_size, feature_dim, problem_config.max_predicates, problem_config.max_arguments, null_arc_index, params.use_cuda, true, params.shuffle==1)
-		
-		problem_config.max_predicates = train_batcher.max_rows --todo: this isn't totally correct. It assumes that the biggest example in the training data is bigger than the biggest example in the test data
-		problem_config.max_arguments = train_batcher.max_cols
-
-		local test_batcher =  SRLBatcher(test_labels_file,test_features_file,test_collision_file_base, test_node_files, batch_size, feature_dim, problem_config.max_predicates, problem_config.max_arguments, null_arc_index, params.use_cuda, false, false)
-
-
-		local y_shape = {batch_size,problem_config.max_predicates,problem_config.max_arguments,domain_size}
-
-		problem_config.y_shape = y_shape
-		local model = SRLSPEN(problem_config, params)
-
-		local preprocess_func = nil
-		local evaluator_factory = function(batcher, soft_predictor)
-			local hard_predictor = RoundingPredictor(soft_predictor,y_shape)
-			local prediction_writing_info
-			if(problem_config.use_official_scoring_script == 1) then
-				prediction_writing_info = {
-					labels = test_batcher.labels,
-					out_file_base = params.out_dir.."/test_pred",
-					label_map_file = srl_labels_map_file,
-					evaluation_script = "srl/scripts/evaluate_dev.sh"
-				}
-			end
-			return SRLEvaluator(batcher, hard_predictor, problem_config.null_arc_index, prediction_writing_info)
-		end  
-
-		return model, y_shape, evaluator_factory, preprocess_func, train_batcher, test_batcher
-	end
-
 else
 	error('invalid problem type')
 end
@@ -194,11 +130,8 @@ do
 
 	local criterion_name = (params.continuous_outputs == 1) and "MSECriterion" or "ClassNLLCriterion"
 	print(params)
-	if(params.instance_weighted_loss == 1) then
-		pretrain_train_config.loss_wrapper = TrainingWrappers:instance_weighted_training(model.classifier_network, criterion_name, y_shape, params)
-	else
-		pretrain_train_config.loss_wrapper = TrainingWrappers:independent_training(model.classifier_network, criterion_name, y_shape, params)
-	end
+
+	pretrain_train_config.loss_wrapper = TrainingWrappers:independent_training(model.classifier_network, criterion_name, y_shape, params)
 	pretrain_train_config.items_to_save = {
 		classifier = model.classifier_network
 	}
@@ -232,11 +165,7 @@ do
 
 	if(params.training_method == "E2E") then
 		local criterion_name = (params.continuous_outputs == 1) and "MSECriterion" or "ClassNLLCriterion"
-		if(params.instance_weighted_loss == 1) then
-			full_train_config.loss_wrapper = TrainingWrappers:instance_weighted_training(full_gd_prediction_net, criterion_name, y_shape, params)
-		else
-			full_train_config.loss_wrapper = TrainingWrappers:independent_training(full_gd_prediction_net, criterion_name, y_shape, params)
-		end
+		full_train_config.loss_wrapper = TrainingWrappers:independent_training(full_gd_prediction_net, criterion_name, y_shape, params)
 	elseif(params.training_method == "SSVM") then
 		local criterion_name = 'MSECriterion' --todo: surface an option for this
 		assert(not params.return_all_iterates)
