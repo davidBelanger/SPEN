@@ -175,9 +175,9 @@ function GradientBasedInference:inference_net_helper(energy_net, init_y, conditi
 		table.insert(to_return,all_iterates)
 	end
 	if(self.config.return_objective_value) then
-		--todo: we could actually be grabbing the value from the optimization_output if it's computing the objectives. 
-		assert(false,'need to be sharing parameters when cloning')
-	 	local objective = objective_for_evaluation:clone()({raw_prediction, conditioning_values}) 
+		--TODO: we could actually be grabbing the value from the optimization_output if it's computing the objectives. 
+		--This is memory inefficient because it's allocating an entirely new energy network
+	 	local objective = objective_for_evaluation:clone('weight','bias')({raw_prediction, conditioning_values}) 
 	 	table.insert(to_return,objective)
 	end
 

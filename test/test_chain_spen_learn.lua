@@ -15,7 +15,6 @@ package.path = package.path .. ';problem/?.lua'
 require 'ChainCRFSequenceTagging'
 
 package.path = package.path .. ';train/?.lua'
-require 'End2End'
 require 'Train'
 require 'SSVM'
 
