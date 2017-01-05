@@ -21,7 +21,7 @@ require 'SSVM'
 package.path = package.path .. ';losses/?.lua'
 require 'SquaredLossPerBatchItem'
 
-local training_method = "SSVM"
+local training_method = "E2E"
 
 config.batch_size = 15
 config.length = 10
