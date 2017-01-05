@@ -12,9 +12,11 @@ To run a self-contained example of image denoising, cd to the base directory for
 
 This is downloads a preprocessed version of a small amount of the depth denoising data from this [paper](http://www.cs.toronto.edu/~slwang/proximalnet.pdf), made available [here](https://bitbucket.org/shenlongwang/), and then fits a SPEN. The associated SPEN architecture is defined in model/DepthSPEN.lua. 
 
-Note that this isn't a traditional denoising task where we assume a parametric noise model, which can be used for producing training pairs of noisy and clean images. 
+Note that depth denoising isn't a traditional denoising task where we assume a parametric noise model. With a parametric noise model, we can create lots of synthetic training data by corrupting clean images. Here, we simply provide ground truth cleaned images and their corresponding observations from a Kinect sensor. 
 
-Let x be the input blurry image and y be the sharpened image we seek to predict. We recover y by MAP inference, where we find y that maximizes P(x | y ) P(y). We assume a Gaussian noise model, so that P(x|y) is scaled mean squared error. There are various parametrizations for the prior distribution P(y). Many previous works have employed a 'field of experts' model: P(y) \propto exp(\sum_i \sum_xy w_i \rho (f_i(x,y))), where f_1(\cdot,\cdot), \ldots, f_k(\cdot,\cdot) are a set of localized linear filter responses and \rho is a nonlinearity. 
+Let x be the input blurry image and y be the sharpened image we seek to predict. We recover y by MAP inference, where we find y that maximizes P(x | y ) P(y). We assume a Gaussian noise model, so that P(x|y) is scaled mean squared error. This isn't the correct noise model for the task; the Kinect sensor's errors behave quite differently. However, it is a reasonable assumption. 
+
+There are various parametrizations for the prior distribution P(y). Many previous works have employed a 'field of experts' model: P(y) \propto exp(\sum_i \sum_xy w_i \rho (f_i(x,y))), where f_1(\cdot,\cdot), \ldots, f_k(\cdot,\cdot) are a set of localized linear filter responses and \rho is a nonlinearity. 
 
 Early work estimated the the weights w_i and the filters by maximizing the likelihood of a dataset of sharp images. Inference in the field of experts model is intractable, and thus practitioners employed approximate methods such as contrastive divergence. 
 
