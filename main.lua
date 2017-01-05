@@ -68,7 +68,7 @@ elseif(params.problem == "MultiLabelClassification") then
 		local test_batcher  = BatcherFromFile(params.test_list, preprocess_func, params.batch_size, use_cuda)
 		return model, y_shape, evaluator_factory, preprocess_func, train_batcher, test_batcher
 	end
-elseif(params.problem == "Depth") then
+elseif(params.problem == "Denoise") then
 	load_problem = function(params)
 		local problem_config = torch.load(params.problem_config)
 		problem_config.batch_size = params.batch_size
@@ -102,7 +102,7 @@ elseif(params.problem == "Depth") then
 		end
 
 		problem_config.y_shape = y_shape
-		local model = DepthSPEN(problem_config,params)
+		local model = DenoiseSPEN(problem_config,params)
 		local evaluator_factory =  function(batcher, soft_predictor)
 			return PSNREvaluator(batcher, function(x) return soft_predictor:forward(x) end)
 		end 

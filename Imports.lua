@@ -57,7 +57,7 @@ require 'Inference1DUtil'
 package.path = package.path .. ';model/?.lua'
 require 'ChainSPEN'
 require 'MLCSPEN'
-require 'DepthSPEN'
+require 'DenoiseSPEN'
 
 package.path = package.path .. ';infer/?.lua'
 require 'GradientBasedInference'

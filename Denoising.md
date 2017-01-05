@@ -10,7 +10,7 @@ To run a self-contained example of image denoising, cd to the base directory for
 `denoise_cmd.sh`
 
 
-This is downloads a preprocessed version of a small amount of the depth denoising data from this [paper](http://www.cs.toronto.edu/~slwang/proximalnet.pdf), made available [here](https://bitbucket.org/shenlongwang/), and then fits a SPEN. The associated SPEN architecture is defined in model/DepthSPEN.lua. 
+This is downloads a preprocessed version of a small amount of the depth denoising data from this [paper](http://www.cs.toronto.edu/~slwang/proximalnet.pdf), made available [here](https://bitbucket.org/shenlongwang/), and then fits a SPEN. The associated SPEN architecture is defined in model/DenoiseSPEN.lua. 
 
 Note that depth denoising isn't a traditional denoising task where we assume a parametric noise model. With a parametric noise model, we can create lots of synthetic training data by corrupting clean images. Here, we simply provide ground truth cleaned images and their corresponding observations from a Kinect sensor. 
 
