@@ -36,14 +36,16 @@ We are releasing code for three applications: [Multi-Label Classification](Multi
 
 It is straightforward to implement new structured prediction applications using our code. See our [API](Applications.md) documentation.
 
-## Quick Start 
-
-We recommend running the sequence tagging example `quick_start_tagging.sh`. This uses main.lua, which has lots of functionality. For a more simple example, you can use test/test_chain_spen_learn.lua. 
-
 ## Code Dependencies
 You'll need to install the following torch packages, which can all be installed using 'luarocks install X:' torch, nn, cutorch, cunn, optim, nngraph. If you're doing stuff with images, we recommend configuring cudnn and using the -cudnn flag to main.lua.
 
 Finally, we use various utility functions from David's [torch-util](https://github.com/davidBelanger/torch-util) project. You will need to clone torch-util such that its relative path to this project is ../torch-util. 
+
+Note that all top-level code in this project, including all tests and example run scripts, are intended to be executed from the base ./SPEN/ directory. For example, you would run 'th test/test_csv_io.lua'. 
+
+## Quick Start 
+
+We recommend running the sequence tagging example `quick_start_tagging.sh`. This uses main.lua, which has lots of functionality. For a more simple example, you can use test/test_chain_spen_learn.lua. 
 
 
 ## Options
