@@ -14,7 +14,3 @@ It will be useful to use the conversion script
 `scripts/ml2torch.lua <features_file> <labels_file> <out_file>`
 
 Here, features_file contains one example per line, where each line is a space-separated list of feature values. The labels_file is defined similarly. For some problems, the labels and/or features are sparse. However, you'll need to provide them as a dense vector here (the SPEN code assumes they're dense anyway). You'll want to use this conversion script for both the train and test data. 
-
-
-
-

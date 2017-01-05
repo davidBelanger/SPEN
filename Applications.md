@@ -21,14 +21,6 @@ SPEN applications, such as SPENMultilabelClassification and SPENDenoise extend t
 `problem.structured_training_loss.loss_criterion`: The training criterion. Used for pretraining the 'unaries' and also for the RNN net. 
 
 ###Block-Structured Y
-For some problems, there are multiple optimization variables, but downstream you only care about one of them. For example, in blind deconvolution we have a latent image and latent blur kernel and we often only care about the image. We provide limited support for this. Depending on the problem structure, you may want to do something different than joint gradient descent on all variables, eg. block coordinate descent. Here, we assume that y is a table of optimization variables. 
-
-`problem.prediction_selector`:  This grabs that one from a table of optimization variables. SPENProblem has a default Identity() implementation. 
-
-`problem.learning_rate_multiplier_per_block`: Table of learning rates to use for table element of y. 
-
-`problem.numOptimizationVariables`: Size of the y table. 
-
-`problem.alternatingUpdates`: Whether to round-robin gradient descent on each element of y, rather than stepping on all of them at once. Basically, poor-man's block coordinate descent. 
+For some problems, there are multiple blocks of optimization variables. This was supported in earlier versions of SPEN, but not anymore. If you need this functionality, let me know and maybe we can reboot it.
 
 
