@@ -1,3 +1,5 @@
+**Jan. 2017: We have released a new version of the SPEN code. It is has more functionality and is nicer for prototyping new applications. See the v2 branch in this repo.**
+
 # Structured Prediction Energy Network Training Code
 
 Structured Prediction Energy Networks (SPENs) are a flexible, expressive approach to structured prediction. See our paper:
