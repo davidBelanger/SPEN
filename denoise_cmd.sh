@@ -31,8 +31,8 @@ problem_options="-problem_config $problem_config"
 #These are the only options that are specific to the problem domain and architecture
 inverse_noise_variance=1.0 #the inverse ariance of assumed noise model. The local potentials are multipled by this.
 problem_options_str="-use_random_crops 1 -local_term_weight $inverse_noise_variance" #there are other options. they're just using default values for now
-th flags/DenoiseOptions.lua $problem_options_str -serialize $problem_config
-problem_options="$problem_options -problem Denoise -continuous_outputs 1 "
+th flags/DepthOptions.lua $problem_options_str -serialize $problem_config
+problem_options="$problem_options -problem Depth -continuous_outputs 1 "
 
 #There are many other hyperparameters that you may want to play with
 inference_options="-init_at_local_prediction 1 -inference_learning_rate 0.1 -max_inference_iters 20  -inference_learning_rate_decay 0 -inference_momentum 0 -learn_inference_hyperparams 0 -unconstrained_iterates 1 -line_search 1 -entropy_weight 0"
