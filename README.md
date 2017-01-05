@@ -1,4 +1,4 @@
-# SPEN Code Version 2
+# Structured Prediction Energy Network Training Code
 
 Structured Prediction Energy Networks (SPENs) are a flexible, expressive approach to structured prediction. See our paper:
 
