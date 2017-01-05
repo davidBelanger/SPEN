@@ -32,7 +32,7 @@ We provide various bits of stand-alone code that might be useful in other applic
 `infer1d/*.lua and model/ChainCRF.lua` provide various useful code for inference and learning in linear-chain CRFs. See various tests for examples of how to use these. 
 
 ## Applications
-We are releasing code for three applications: [Multi-Label Classification](MultiLabelClassification.md), [Sequence Tagging](Tagging.md), and [Image Denoising](Denoising.md). All of these contain quick start scripts. 
+We are releasing code for three applications: [Multi-Label Classification](MultiLabelClassification.md), [Sequence Tagging](SequenceTagging.md), and [Image Denoising](Denoising.md). All of these contain quick start scripts. 
 
 It is straightforward to implement new structured prediction applications using our code. See our [API](Applications.md) documentation.
 
