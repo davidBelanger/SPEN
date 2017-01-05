@@ -35,9 +35,14 @@ function Train:train()
         self.num_iters = i
         prev_time = sys.clock()
         for j = 1,batches_per_epoch do
+            -- local start = os.clock()
     	    local minibatch_targets,minibatch_inputs = unpack(self.batch_iterator())
+            -- local loading_time = os.clock() - start
+            -- local start = os.clock()
             num_processed = num_processed + self.general_config.batch_size
             self:train_batch(minibatch_inputs,minibatch_targets) 
+            -- local training_time = os.clock() - start
+            -- print(loading_time.." "..training_time)
         end
         local avg_error = self.total_error/batches_per_epoch
         local curr_time = sys.clock()

@@ -8,7 +8,7 @@ function GeneralOptions:get_flags()
 
 	--General Options
 	cmd:option('-gpuid',-1,'which gpu to use. -1 = use CPU')
-	cmd:option('-cudnn',true,'whether to use cudnn, where appropriate')
+	cmd:option('-cudnn',1,'whether to use cudnn, where appropriate')
 	cmd:option('-batch_size',32,'minibatch size')
 	cmd:option('-profile',0,"whether to do profiling")
 	cmd:option('-shuffle',1,'whether to shuffle the data after you take a pass through it') --todo: needs reboot
@@ -23,6 +23,7 @@ function GeneralOptions:get_flags()
 	--Data Options
 	cmd:option('-train_list','','list of torch format train files')
 	cmd:option('-test_list','','list of torch format dev/test files')
+	cmd:option('-continuous_outputs',0,'whether the outputs are continuous or discrete')
 
 	--Pretrained Parameters Options
 	cmd:option('-init_classifier',"","where to load pretrained feature network from")
@@ -38,6 +39,11 @@ function GeneralOptions:get_flags()
 	cmd:option('-line_search',1,"whether to do line search")
 	cmd:option('-init_line_search_step',1.0,"initial step size for backtracking line search")
 	cmd:option('-inference_rtol',0.00001,"initial step size for backtracking line search")
+	cmd:option('-penalize_all_iterates',0,'whether to apply the loss to iterates besides the final one. (If 0, then convergence regularization is not used)')
+	cmd:option('-first_iter_to_apply_loss',10,"first iterate beyond which to penalize the loss")
+
+	cmd:option('-convergence_regularization_weight',0.0,'weight to place on term the regularizes consecutive iterates to speed up convergence')
+	cmd:option('-first_iter_to_penalize_convergence',10,"first iterate beyond which to penalize the convergence criterion")
 
 	cmd:option('-inference_learning_rate',0.1,"learning rate for inference")
 	cmd:option('-inference_learning_rate_power',1.0,"learning rate power for inference")
@@ -49,7 +55,6 @@ function GeneralOptions:get_flags()
 	cmd:option('-unconstrained_iterates',1,"whether to use logits as inference iterates") 
 	cmd:option('-mirror_descent',1,"whether to use mirror descent for simplex-constrained problems") 
 	cmd:option('-entropy_weight',1.0,"weight to place on entropy term") 
-
 	cmd:option('-init_at_local_prediction',1,"whether to init prediction using unary predictor")
 
 
@@ -57,14 +62,13 @@ function GeneralOptions:get_flags()
 	cmd:option('-instance_weighted_loss',0,"whether to use an instance-weighted loss. Right now, this is only supported for SRL")
 	cmd:option('-loss_type',"log","what training loss to use")
 	cmd:option('-negative_example_weight',0.001,"how much to down-weight negative examples (only available for certain losses)")
+	cmd:option('-false_positive_penalty',0,"Only for SRL. How much extra weight to place on the loss for arcs that weren't filtered by the preprocessing but have a ground truth null label")
+
 
 
 	cmd:option('-results_file',"","optional file base name for writing results files")
-	cmd:option('-test_minibatch_size',6400,"batch size at test time")
 	cmd:option('-model_file',"","base name for where to save models. the output .rnn file contains the full unrolled inference network. The .energy_net file only contains the energy network.")
 	cmd:option('-out_dir',"./results/","base name for where to save models")
-
-	cmd:option('-print_norms',false,"whether to print the various norms of the parameters after every epoch")
 
 
 	return cmd
@@ -73,6 +77,8 @@ end
 
 
 --Graveyard of no-longer-supported options
+	-- cmd:option('-test_minibatch_size',6400,"batch size at test time")
+	-- cmd:option('-print_norms',false,"whether to print the various norms of the parameters after every epoch")
 	-- cmd:option('-clone_predictor',0,'whether to use a fixed predictor net, or one that is learned')
 	-- cmd:option('-inference_perturbation',0,"whether to add random perturbations to inference optimization during training. currently not fully supported.")
 	-- cmd:option('-scale_direct_energy',0,"when clamping the unaries, whether to learn a global scale on them")

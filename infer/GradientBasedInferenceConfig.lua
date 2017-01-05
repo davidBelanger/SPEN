@@ -15,10 +15,12 @@ function GradientBasedInferenceConfig:get_gd_inference_config(params)
 	local gd_inference_config = {
 	    return_objective_value = false,
 	    entropy_weight = params.entropy_weight,
-	    logit_iterates = params.unconstrained_iterates == 1,
+	    logit_iterates = params.unconstrained_iterates == 1 and not (params.continuous_outputs == 1),
 	    mirror_descent = params.mirror_descent == 1,
 	    return_optimization_diagnostics = false,
-	    optimization_config = optimization_config
+	    optimization_config = optimization_config,
+	    return_all_iterates = params.return_all_iterates,
+	    continuous_outputs = params.continuous_outputs == 1
 	}
 
 	return gd_inference_config

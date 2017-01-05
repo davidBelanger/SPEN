@@ -49,7 +49,9 @@ print(yp:size())
 
 local instance_weights = torch.rand(b,n,m):view(yp:size())
 local log_of_ground_truth = soft_pred:gather(2,yp)
+local norm = log_of_ground_truth:norm()
 local loss = log_of_ground_truth:cmul(instance_weights):sum()*-1
+assert(norm == soft_pred:gather(2,yp):norm(),"the gather did things in place")
 
 local self = {}
 self.d_pred = self.d_pred or soft_pred:clone()

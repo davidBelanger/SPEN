@@ -60,7 +60,7 @@ local evaluate = Callback(function(i) return evaluator:evaluate(i) end,1)
 
 local optimization_config = {
     num_epochs = 25,
-    batches_per_epoch = 500,
+    batches_per_epoch = 100,
     opt_config = {learningRate=0.001},
     gradient_clip = 2.0,
     opt_state = {},   
@@ -77,6 +77,8 @@ local training_config = {
 
 Train(loss_wrapper,batcher,optimization_config, training_config):train()
 local final_acc = evaluator:evaluate('final')
+print('\n')
+print('bayes_accuracy','final accuracy')
 print(bayes_accuracy, final_acc)
 --assert that it can get within 5% of the Bayes error
 assert((bayes_accuracy - final_acc) < 0.05)

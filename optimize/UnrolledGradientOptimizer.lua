@@ -60,7 +60,7 @@ end
 
 --this instantiates a network (not an nngraph node) for taking a single step. 
 --its inputs are {yt,ht,conditioning_values}
---its outputs are {yt1,ht1,converged,objective (optional)}. The outputs may also contain a fourth entry for the objective value.
+--its outputs are {yt1,ht1,converged,objective (optional)}.
 
 function get_recurrent_cell(objective,t,config)
 	local yt = nn.Identity()()
@@ -231,11 +231,13 @@ function unrolled_gradient_descent_optimizer(objective, input_config)
 		end
 		if(config.return_all_iterates) then
 			iterate_rank = table.getn(config.iterate_shape)
+
 			size = torch.LongStorage(iterate_rank + 1)
+			size[1] = 1
+
 			for i = 1,iterate_rank do
-				size[i] = config.iterate_shape[i]
+				size[i+1] = config.iterate_shape[i]
 			end
-			size[iterate_rank + 1] = 1
 			table.insert(iterates,nn.View(size)(curr_step.iterate))
 		end
 		if(config.return_convergence_indicators) then
@@ -246,6 +248,7 @@ function unrolled_gradient_descent_optimizer(objective, input_config)
 	--NOTE: this doesn't compute the objective at the final iterate. not sure how best to do this
 
 	local final_iterate = curr_step.iterate
+
 	local tensors_to_return = {final_iterate}
 	if(config.return_objective_values) then
 		local objective_values_tensor = nn.JoinTable(2,2)(objective_values)
@@ -253,8 +256,7 @@ function unrolled_gradient_descent_optimizer(objective, input_config)
 	end
 
 	if(config.return_all_iterates) then
-		local size = table.getn(config.iterate_shape) + 1
-		local all_iterates = nn.JoinTable(size, size)(iterates)
+		local all_iterates = nn.JoinTable(1)(iterates)
 		table.insert(tensors_to_return,all_iterates)
 	end
 

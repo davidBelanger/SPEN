@@ -15,25 +15,32 @@ function SPEN:__init(config, params)
 	self.y_shape = config.y_shape
 	self.config = config
 
-	if(params.use_cuda and params.cudnn) then
+	if(params.use_cuda and params.cudnn == 1) then
 		self.nn = cudnn
 	else
 		self.nn = nn
 	end
-
+	self.continuous_outputs = params.continuous_outputs and params.continuous_outputs == 1
 	local energy_network, local_potentials_net, global_potentials_net = self:energy_net()
-	self._local_potentials_net = nn.TruncatedBackprop(local_potentials_net)
+	self._local_potentials_net = local_potentials_net
 	local features_network = nn.TruncatedBackprop(self:features_net())
 
 	--the unaries_network is the local classifier, but without the features network
-	local unaries_network = nn.Sequential():add(self._local_potentials_net):add(nn.MulConstant(-1,true)):add(self:normalize_unary_prediction()) --we multiply by -1 because inference does energy *minimization*, but local classification will maximize the score for a prediction. 
 
+	local unaries_network 
+	if(self.continuous_outputs) then
+		unaries_network = self._local_potentials_net
+	else
+		unaries_network = nn.Sequential():add(self._local_potentials_net):add(nn.MulConstant(-1,true)):add(self:normalize_unary_prediction()) --we multiply by -1 because inference does energy *minimization*, but local classification will maximize the score for a prediction. 
+	end
+	
 	local classifier_network = nn.Sequential():add(features_network):add(unaries_network)
 
 	local initialization_network
 	if(params.init_at_local_prediction and params.init_at_local_prediction == 1) then
 		initialization_network = unaries_network
 	else
+		assert(not (self.continuous_outputs),'not implemented')
 		initialization_network = self:uniform_initialization_net()
 	end
 
@@ -68,6 +75,7 @@ function SPEN:features_net()
 	os.error("children of SPEN should implement this method")
 end
 
+--Unlike the global_energy_net, this doesn't return an actual energy value, it returns the sufficient satistics of a local model that defines an energy.
 function SPEN:unary_energy_net()
 	os.error("children of SPEN should implement this method")
 end
@@ -118,11 +126,24 @@ function SPEN:energy_net()
 	local conditioning_values = nn.Identity()() --b x l x h
 	local y = nn.Identity()()
 	
-	local local_potentials_net = self:unary_energy_net()
+	local local_potentials_net = nn.TruncatedBackprop(self:unary_energy_net())
 	local global_potentials_net = self:global_energy_net()
 
+	-- We assume that the local potentials are the natural parameters of a simple local exponential family distribution
+	-- For discrete problems, we have a categorical distribution, and thus the negative log-probability (aka the energy) is given by a dot product between the potentials and the 'marginals'
+	-- For continuous problems, we assume a local Gaussian (with learned variance), so the local potentials are a scaled squared loss, and we represent the sufficient statistic simply as a single scalar conditional expectation
+	local local_potentials
+	if(self.continuous_outputs) then
+		--todo: you could have a variance that is specific to each datacase, rather than a shared global one
+		local_potentials = nn.Sum(2)(nn.Reshape(-1)(nn.Mul()(nn.Square()(nn.CSubTable()({self:convert_y_for_local_potentials(y),local_potentials_net(conditioning_values)})))))
 
-	local local_potentials = nn.Sum(2)(nn.Reshape(-1)(nn.CMulTable()({self:convert_y_for_local_potentials(y),local_potentials_net(conditioning_values)})))
+	else
+		local_potentials = nn.Sum(2)(nn.Reshape(-1)(nn.CMulTable()({self:convert_y_for_local_potentials(y),local_potentials_net(conditioning_values)})))
+	end
+
+	if(self.config.local_term_weight and self.config.local_term_weight ~= 1.0) then
+		local_potentials = nn.MulConstant(self.config.local_term_weight,true)(local_potentials)
+	end
 
 	local global_potentials = global_potentials_net({y,conditioning_values})
 	if(self.config.global_term_weight and self.config.global_term_weight ~= 1.0) then

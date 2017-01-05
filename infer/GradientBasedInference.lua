@@ -9,13 +9,16 @@ function GradientBasedInference:__init(y_shape,config)
 	self.y_shape = y_shape
 	self.config = config
 	self.domain_size = y_shape[#y_shape]
-	self.use_single_probs = (self.domain_size == 2) and (not config.logit_iterates)
+	self.use_single_probs = (self.domain_size == 2) and (not config.logit_iterates) and not config.continuous_outputs
+	assert(not (config.continuous_outputs and config.logit_iterates) )
 	self.optimization_config = config.optimization_config
+	self.continuous_outputs = config.continuous_outputs
 	assert(self.optimization_config)
 end
 
 --TODO: have this network take y-x
 function GradientBasedInference:loss_augmented_spen_inference(spen, cost_net)
+	assert(not self.continuous_outputs,'not implemented for continuous outputs')
 	--now, the features return {ygt,F(x)}
 	local loss_augmented_features_network = nn.ParallelTable():add(nn.Identity()):add(spen.features_network)
 
@@ -49,11 +52,11 @@ function GradientBasedInference:full_inference_net(initialization_network, featu
 	local expanded_energy_net = self:expand_energy_net(energy_network)
 
 	local return_modules = self:inference_net_helper(expanded_energy_net,init_y,conditioning_values)
-
 	return nn.gModule({input}, return_modules)
 end
 
 function GradientBasedInference:expand_initialization_net(init_net)
+	if(self.continuous_outputs) then return init_net end
 	local expanded = nn.Sequential():add(init_net)
 	if(self.use_single_probs) then 
 		--todo: this won't work if we have a single continuous value
@@ -62,10 +65,12 @@ function GradientBasedInference:expand_initialization_net(init_net)
 	if(self.config.logit_iterates) then 
 		expanded:add(nn.Log())
 	end
+
 	return expanded
 end
 
 function GradientBasedInference:expand_energy_net(energy_net)
+	if(self.continuous_outputs) then return energy_net end
 	local config = self.config
 	local use_single_probs = (self.domain_size == 2) and (not config.logit_iterates)
 	if(config.optimization_config.line_search) then assert(config.logit_iterates) end
@@ -80,7 +85,7 @@ function GradientBasedInference:expand_energy_net(energy_net)
 
 		local y_to_energy
 		if(prepend_softmax_to_energy) then
-			y_to_energy = self:softmax_nd()(y)
+			y_to_energy = self:softmax_nd(self.y_shape)(y)
 		else --todo: we don't support using single logits for binary problems
 			y_to_energy = self:expand_to_probs(y)
 		end
@@ -113,6 +118,7 @@ function GradientBasedInference:inference_net_helper(energy_net, init_y, conditi
 	local optimization_config = self.optimization_config
 	optimization_config.iterate_shape = self:iterate_shape()
 
+	optimization_config.return_all_iterates = self.config.return_all_iterates
 	if(self.config.return_optimization_diagnostics) then
 		--todo: don't compute the objective value necessarily...
 		self.config.return_objective_value = true
@@ -122,7 +128,7 @@ function GradientBasedInference:inference_net_helper(energy_net, init_y, conditi
 	end
 
 
-	if(not self.config.logit_iterates) then
+	if((not self.config.logit_iterates) and (not self.config.continuous_outputs)) then
 		if(not self.config.mirror_descent) then
 			assert(self.domain_size == 2)
 			eps = 1e-3 --we clamp to the interior of [0,1]
@@ -141,24 +147,37 @@ function GradientBasedInference:inference_net_helper(energy_net, init_y, conditi
 	end
 
 	local optimization_output = unrolled_gradient_descent_optimizer(objective_for_optimization, optimization_config)({init_y,conditioning_values})
-
 	local raw_prediction
-	if(self.config.return_optimization_diagnostics) then
+	if(optimization_config.return_all_iterates) then
 		raw_prediction = nn.SelectTable(1)(optimization_output)
 	else
 		raw_prediction = optimization_output
 	end
 	local prediction = raw_prediction
 	if(self.config.logit_iterates) then
-		prediction = self:softmax_nd()(raw_prediction) 
+		prediction = self:softmax_nd(self.y_shape)(raw_prediction) 
 	elseif(self.use_single_probs) then
 		prediction = self:expand_to_probs(raw_prediction)
 	end
 	local to_return = {prediction}
 
+	if(self.config.return_all_iterates) then
+		local all_iterates = nn.SelectTable(2)(optimization_output)
+		if(self.config.logit_iterates) then
+			local all_iterate_shape = {optimization_config.num_iterations}
+			for i = 1,#self.y_shape do
+				table.insert(all_iterate_shape,self.y_shape[i])
+			end
+			all_iterates = self:softmax_nd(all_iterate_shape)(all_iterates) 
+		elseif(self.use_single_probs) then
+			assert(false,'not implemented')
+		end
+		table.insert(to_return,all_iterates)
+	end
 	if(self.config.return_objective_value) then
 		--todo: we could actually be grabbing the value from the optimization_output if it's computing the objectives. 
-	 	local objective = objective_for_evaluation:clone()({raw_prediction, conditioning_values})
+		assert(false,'need to be sharing parameters when cloning')
+	 	local objective = objective_for_evaluation:clone()({raw_prediction, conditioning_values}) 
 	 	table.insert(to_return,objective)
 	end
 
@@ -181,33 +200,35 @@ function GradientBasedInference:iterate_shape()
 	end
 end
 
-function GradientBasedInference:softmax_nd(t)
+function GradientBasedInference:softmax_nd(shape)
+	assert(not self.continuous_outputs,'should not be here')
 	local s = nn.Sequential()
 	local big_batch_shape = 1
-	for i = 1,(#self.y_shape-1) do
-		big_batch_shape = big_batch_shape*self.y_shape[i]
+	for i = 1,(#shape-1) do
+		big_batch_shape = big_batch_shape*shape[i]
 	end
 	s:add(nn.View(big_batch_shape,self.domain_size))
 	s:add(nn.SoftMax())
-	s:add(nn.View(unpack(self.y_shape)))
+	s:add(nn.View(unpack(shape)))
 
 	return s
 end
 
 --typically, you add entropy to the objective being maximized, so here, it gets subtracted because we minimize the negative objective
 function GradientBasedInference:subtract_entropy_from_objective(objective_net)
+	assert(self.config.entropy_weight > 0)
+	assert(not self.continuous_outputs,'should not be using entropy smoothing for continuous output problems')
 	local y = nn.Identity()()
 	local conditioning_values = nn.Identity()()
 	local y_node_margs
 	if(self.config.logit_iterates and not self.use_single_probs) then
-		y_node_margs = self:softmax_nd()(y)
+		y_node_margs = self:softmax_nd(self.y_shape)(y)
 	elseif(self.use_single_probs) then
 		y_node_margs = self:expand_to_probs(y)
 	else
 		y_node_margs = y
 	end
 
-	assert(self.config.entropy_weight > 0)
 	local entropy_term = nn.MulConstant(-self.config.entropy_weight)(nn.Entropy()(y_node_margs)) 
 
 	local objective = objective_net({y,conditioning_values})

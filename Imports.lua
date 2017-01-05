@@ -17,6 +17,7 @@ require 'Callback'
 require 'OneHot'
 require 'SquaredLossPerBatchItem'
 require 'Saver'
+require 'RepeatedCriterion'
 
 package.path = package.path .. ';optimize/?.lua'
 
@@ -38,6 +39,7 @@ require 'Evaluator'
 require 'HammingEvaluator'
 require 'MultiLabelEvaluation'
 require 'SRLEvaluator'
+require 'PSNREvaluator'
 
 
 package.path = package.path .. ';batch/?.lua'
@@ -59,6 +61,7 @@ package.path = package.path .. ';model/?.lua'
 require 'ChainSPEN'
 require 'MLCSPEN'
 require 'SRLSPEN'
+require 'DepthSPEN'
 
 package.path = package.path .. ';infer/?.lua'
 require 'GradientBasedInference'
