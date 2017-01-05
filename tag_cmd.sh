@@ -10,7 +10,7 @@ echo ./data/sequence/crf-data.train > ./data/sequence/crf-data.train.list
 echo ./data/sequence/crf-data.test > ./data/sequence/crf-data.test.list
 
 data_options="-train_list ./data/sequence/crf-data.train.list -test_list ./data/sequence/crf-data.test.list  -out_dir $results_file_dir -model_file $d/model- $iC"
-system_options=" -batch_size 10  -gpuid -1 -profile 0  -test_minibatch_size 10"
+system_options=" -batch_size 10  -gpuid -1 -profile 0"
 
 #These are the only options that are specific to the problem domain and architecture
 problem_config=$d/problem-config 
@@ -30,7 +30,7 @@ base_training_config="-gradient_clip 1.0 -optim_method adam -evaluation_frequenc
             -batches_per_epoch 100 -learning_rate_decay 0.0 -learning_rate_decay_start 20 -l2 0 "
 
 
-pretrain_configs="$base_training_config -learning_rate 0.001 -num_epochs 250 -training_mode pretrain_unaries"
+pretrain_configs="$base_training_config -learning_rate 0.001 -num_epochs 100 -training_mode pretrain_unaries"
 first_pass_configs="$base_training_config -learning_rate 0.001 -num_epochs 100 -training_mode clamp_features"
 second_pass_configs="$base_training_config -learning_rate 0.0005 -num_epochs 500 -training_mode update_all"
 
