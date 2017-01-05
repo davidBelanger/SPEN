@@ -1,3 +1,6 @@
+# January 2017 Update
+We have made a new 0.2 release. It is substantially more user-friendly for prototyping new applications. The old code can be found by checking out the v0.1 tag. 
+
 # Structured Prediction Energy Network Training Code
 
 Structured Prediction Energy Networks (SPENs) are a flexible, expressive approach to structured prediction. See our paper:
@@ -7,7 +10,7 @@ Structured Prediction Energy Networks (SPENs) are a flexible, expressive approac
 
 <!-- This project contains [torch](http://torch.ch/) code for SPENs. We provide code for two use cases: multi-label classification and image denoising. We also provide a generic API for which it should be easy to prototype additional applications. If you would like to do so, feel free to contact David Belanger for advice.  -->
 
-## Updates in Version 2
+## v0.2 vs. v0.1
 Basically everything. The code is substantially more modular: it now provides proper abstractions between models, prediction methods, training losses, etc. We have also added a considerable number of tests. We have also added back a structured SVM training method, as was used in the ICML paper, and examples for sequence tagging. Algorithmically, there are a number of improvements, including backpropagation through a broader selection of optimization methods, dynamic unrolling of the computation graph for iterative prediction (to account for variable numbers of iterations), and explicit regularization to encourage the iterative prediction to converge quickly. 
 
 Note that some functionality, such as dropout or different batch sizes at test time vs. train time, is no longer supported in this code. Some, but not all of it could be added back easily. Let us know if you have particular requests. 
