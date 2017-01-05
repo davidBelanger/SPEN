@@ -7,7 +7,7 @@ To run a self-contained example of image denoising, cd to the base directory for
 
 `tar -xvf depth_denoise.tar.gz`
 
-`depth_cmd.sh`
+`denoise_cmd.sh`
 
 
 This is downloads a preprocessed version of a small amount of the depth denoising data from this [paper](http://www.cs.toronto.edu/~slwang/proximalnet.pdf), made available [here](https://bitbucket.org/shenlongwang/), and then fits a SPEN. The associated SPEN architecture is defined in model/DepthSPEN.lua. 
