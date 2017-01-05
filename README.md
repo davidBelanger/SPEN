@@ -1,4 +1,8 @@
-# SPEN Code Version 2
+# January 2017 Update
+We have made a new pre-0.2 release. It is substantially more user-friendly for prototyping new applications. The old code can be found on github.com/davidBelanger/SPEN/releases. Please let us know if you have any suggestions for the code.
+
+
+# SPENs in Torch
 
 Structured Prediction Energy Networks (SPENs) are a flexible, expressive approach to structured prediction. See our paper:
 
