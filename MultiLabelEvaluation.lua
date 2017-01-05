@@ -16,7 +16,7 @@ function MultiLabelEvaluation:evaluateInference(batcher,net,initAtPred,iterName)
 end
 
 function MultiLabelEvaluation:evaluate(batcher,net,useClassifier,initAtPred,iterName)
-	local exampleCount = 0
+	local exampleCount= 0
 	batcher:reset()
 	print('STARTING EVALUATION')
 	net:evaluate()
@@ -136,10 +136,6 @@ function MultiLabelEvaluation:evaluate(batcher,net,useClassifier,initAtPred,iter
 				 --compute lt bc inference does minimization
 			end
 			local peak = inferencer:peakedness(inferred_labels)
-			print('-----------')
-			print(num_actual_data)
-						print('ooooooooooo')
-
 			print(batch_labels:size())
 			local il = inferred_labels:narrow(1,1,num_actual_data)
 			local bl = batch_labels:narrow(1,1,num_actual_data)

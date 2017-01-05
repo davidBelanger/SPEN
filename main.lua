@@ -186,7 +186,7 @@ local criterion = problem.structured_training_loss.loss_criterion
 
 local inferencer = RNNInference(problem,params)
 
-problem.inferencer = inferencer --this is network API equivalent to a simple feed-forward classifier. It is the unrolled computation graph for doing gradient descent on the energy function
+problem.inferencer = inferencer --this network is API equivalent to a simple feed-forward classifier. It is the unrolled computation graph for doing gradient descent on the energy function
 local testInferencer = inferencer --this doesn't necessarily have to be the same as the one used at train time. For example, we may want to run for more gradient descent iterations
 
 if(params.initFullNet ~= "") then
