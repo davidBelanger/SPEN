@@ -35,7 +35,7 @@ function ChainCRF:features_net(x)
 		x_pad = nn.JoinTable(2,3)({left_pad,x,right_pad})
 	end
 
-	local f1 = nn.TemporalConvolution(self.feature_size,self.config.feature_hid_size,self.config.feature_width,1)(x_pad)
+	local f1 = self.nn.TemporalConvolution(self.feature_size,self.config.feature_hid_size,self.config.feature_width,1)(x_pad)
 	local features = nn.ReLU()(f1)
 	return nn.gModule({x},{features})
 end
@@ -43,7 +43,7 @@ end
 function ChainCRF:unary_energy_net()
 	local conditioning_values = nn.Identity()() --b x l x h
 	local feature_size = self.config.feature_hid_size
-	local local_potentials = nn.TemporalConvolution(feature_size,self.domain_size,1,1)(conditioning_values)
+	local local_potentials = self.nn.TemporalConvolution(feature_size,self.domain_size,1,1)(conditioning_values)
 	local_potentials.data.module.weight:mul(self.config.local_potentials_scale)
 	local local_potentials_net = nn.gModule({conditioning_values},{local_potentials})
 	self.local_potentials_net = local_potentials_net
@@ -59,7 +59,7 @@ function ChainCRF:pairwise_potentials()
 		f_for_pairwise = nn.MulConstant(0)(f_for_pairwise)
 	end
 
-	local pairwise_potentials = nn.TemporalConvolution(feature_size,self.domain_size*self.domain_size,2,1)(f_for_pairwise)
+	local pairwise_potentials = self.nn.TemporalConvolution(feature_size,self.domain_size*self.domain_size,2,1)(f_for_pairwise)
 	pairwise_potentials.data.module.weight:mul(self.config.pairwise_potentials_scale)
 	pairwise_potentials = nn.Reshape(self.batch_size,self.length-1,self.domain_size,self.domain_size,false)(pairwise_potentials)
 
