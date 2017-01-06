@@ -65,5 +65,5 @@ cmd="th main.lua $data_options $system_options $problem_options $inference_optio
 echo echo running in $d > $d/cmd.sh    
 echo export CUDA_VISIBLE_DEVICES=$GPUID >> $d/cmd.sh                                                                                                                                                                                                
 echo $cmd >> $d/cmd.sh                                                                               
-sh $d/cmd.sh 2>&1 |  tee $log  | tee mlc-latest.out
+sh $d/cmd.sh 2>&1 |  tee $log  | tee latest-run.out
 

@@ -1,7 +1,7 @@
 local Evaluator = torch.class('Evaluator')
 
---todo: this should take a factory for an iterator
 
+--this is an abstract class that requires an implementation of self:score_prediction(y_pred,y,num). It returns the total loss for a batch (not averaged by the size of the batch)
 function Evaluator:__init(batcher,predict_func)
 	self.batcher = batcher
 	self.predict_func = predict_func
@@ -10,9 +10,11 @@ end
 function Evaluator:evaluate_batch(batch)
 	local y = batch[1]
 	local x = batch[2]
+	local num = batch[3]
 	local y_pred = self.predict_func(x)
-	local num = y:nElement() --todo: use the data returned by the batcher, which may have num_actual_data
-	return self:score_prediction(y_pred,y), num
+	y_pred = y_pred:narrow(1,1,num)
+	y = y:narrow(1,1,num)
+	return self:score_prediction(y_pred,y, num), num
 end
 
 function Evaluator:evaluate(msg)
