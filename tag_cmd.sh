@@ -50,7 +50,7 @@ general_training_options="-training_method E2E"
 base_training_config="-gradient_clip 1.0 -optim_method adam -evaluation_frequency 25 -save_frequency 25  -adam_epsilon 1e-8 -batches_per_epoch 100 -learning_rate_decay 0.0"
 
 
-pretrain_configs="$base_training_config -learning_rate 0.001 -num_epochs 100 -training_mode pretrain_unaries"
+pretrain_configs="$base_training_config -learning_rate 0.001 -num_epochs 30 -training_mode pretrain_unaries"
 first_pass_configs="$base_training_config -learning_rate 0.001 -num_epochs 100 -training_mode clamp_features"
 second_pass_configs="$base_training_config -learning_rate 0.0005 -num_epochs 500 -training_mode update_all"
 
