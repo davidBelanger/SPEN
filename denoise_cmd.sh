@@ -31,8 +31,8 @@ problem_options="-problem_config $problem_config"
 #These are the only options that are specific to the problem domain and architecture
 inverse_noise_variance=1.0 #the inverse ariance of assumed noise model. The local potentials are multipled by this.
 problem_options_str="-use_random_crops 1 -local_term_weight $inverse_noise_variance" #there are other options. they're just using default values for now
-th flags/DepthOptions.lua $problem_options_str -serialize $problem_config
-problem_options="$problem_options -problem Depth -continuous_outputs 1 "
+th flags/DenoiseOptions.lua $problem_options_str -serialize $problem_config
+problem_options="$problem_options -problem Denoise -continuous_outputs 1 "
 
 #There are many other hyperparameters that you may want to play with
 inference_options="-init_at_local_prediction 1 -inference_learning_rate 0.1 -max_inference_iters 20  -inference_learning_rate_decay 0 -inference_momentum 0 -learn_inference_hyperparams 0 -unconstrained_iterates 1 -line_search 1 -entropy_weight 0"
@@ -45,7 +45,7 @@ base_training_config="-gradient_clip 1.0 -optim_method adam -evaluation_frequenc
 # Therefore, we skip the first two training steps (by setting num_epochs = 0 for them)
 pretrain_configs="$base_training_config -learning_rate 0.001 -num_epochs 0 -training_mode pretrain_unaries" 
 first_pass_configs="$base_training_config -learning_rate 0.001 -num_epochs 0 -training_mode clamp_features"
-second_pass_configs="$base_training_config -learning_rate 0.0005 -num_epochs 500 -training_mode update_all"
+second_pass_configs="$base_training_config -learning_rate 0.001 -num_epochs 500 -training_mode update_all"
 
 # This packages up lua tables for the options that are specific to the different stages of training.
 training_config=$d/train-config
