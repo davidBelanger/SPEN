@@ -1,4 +1,3 @@
-
 GPUID=0 #set this to something >= 0 to use the GPU
 
 torch_gpu_id=0 #torch always thinks it's running on GPUID 0, but the CUDA_VISIBLE_DEVICES environment variable (set below) changes what that means.
